@@ -24,11 +24,22 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
-
 @router.get("/", response_model=List[UserSchema])
-def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def get_users(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
     users = db.query(User).offset(skip).limit(limit).all()
     return users
+
+@router.get("/{id}", response_model=UserSchema)
+def get_user(id: int, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.id == id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
+
+# @router.get("/", response_model=List[UserSchema])
+# def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+#     users = db.query(User).offset(skip).limit(limit).all()
+#     return users
 
 
 @router.get("/{user_id}", response_model=UserSchema)
